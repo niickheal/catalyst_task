@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Upload Data</h2>
+<div class="alert alert-success  d-none" role="alert" id='alert_c'>
+    
+  </div>
+<form id = 'form_submit' action='' name = 'form_submit'>
+    {% csrf_token %}
+    <div class="input-group mb-3">  
+        <div class="custom-file">
+            <input type="file" class="form-control" id="file_field" name = "file_field">
+        </div>
+    </div>
+    <div class="form-group">
+    <button type="button" class="btn btn-primary" id='btn_submit' name='btn_submit'>Start Upload</button>
+    </div>
+</form>
+<div id="progress_div" class="d-none">
+    Upload Progress
+    <div class="progress">
+        <div class="progress-bar" id = 'progress_bar' name = "progress_bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="50" aria-valuemax="100"></div>
+    </div>
+</div>
+<script>
+    input = document.getElementById('file_field')
+    console.log(input)
+    button = document.getElementById('btn_submit')
+    form = document.getElementById('form_submit')
+    progress = document.getElementById('progress_bar')
+    progress_div = document.getElementById('progress_div')
+    csrf = document.getElementsByName('csrfmiddlewaretoken')
+    const image_data = input.files[0]
+    input.addEventListener('change' , ()=>{
+        progress_div.classList.remove('d-none')
+    })
+    button.addEventListener('click' , ()=>{
+        const f_form = new FormData()
+        f_form.append('csrfmiddlewaretoken',csrf[0].value)
+        f_form.append('image', input.files[0])
+        console.log(input.files[0])
+        $.ajax({
+            type:"POST",
+            url:form.action,
+            enctype:'multipart/form-data',
+            data:f_form,
+            beforeSend: function(){ 
+
+            },
+            xhr: function(){
+                const xhr = new window.XMLHttpRequest();
+                xhr.upload.addEventListener('progress',e=>{
+                    progress_per = (e['loaded']/e['total'])*100
+                    console.log(e)
+                    progress.style.width = progress_per + '%'
+                })
+                return xhr
+            },
+            success: function(response){
+                console.log(response)
+                alert_c = document.getElementById('alert_c')
+                alert_c.classList.remove('d-none')
+                alert_c.innerHTML = response['msg']
+            },
+            error: function(error){
+                console.log(error)
+            },
+            cache: false,
+            contentType:false,
+            processData:false
+        })
+    })
+</script>
+{% endblock content %}

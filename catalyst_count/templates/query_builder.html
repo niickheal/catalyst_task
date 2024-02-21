@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Query Builder</h2>
+
+<div class="alert alert-success d-none" role="alert" id="alert_c">
+</div>
+
+<form id = 'form_submit' name = 'form_submit' method='post' action = "">
+    {% csrf_token %}
+    <div class='container-sm' style='width:800px'>
+    <div class="row">
+        <div class="col p-1">
+            <input type="text" name = 'keyword' id ='keyword'></input>
+        </div>
+        <div class="col p-1">
+            <select class="form-select" style="width:200px" id = "industry" name = "industry">
+                <option value="" selected value="">Industry</option>
+                {% for i in industry %}
+                <option value = "{{i}}">{{ i }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col p-1">
+            <select class="form-select" style="width:200px" name = "year_founded" id = "year_founded">
+                <option selected value="">Year founded</option>
+                {% for i in year_founded %}
+                <option value = "{{i}}">{{ i }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="w-100"></div>
+        <div class="col p-1">
+            <select class="form-select" style="width:200px" name = "city" id = "city" >
+                <option selected value="">City</option>
+                {% for i in city %}
+                <option value = "{{i}}">{{ i }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col p-1">
+            <select class="form-select" style="width:200px" name = "state" id="state">
+                <option selected value="">State</option>
+                {% for i in state %}
+                <option value = "{{i}}">{{ i }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col p-1">
+            <select class="form-select" style="width:200px" name = "country" id="country">
+                <option selected value="">Country</option>
+                {% for i in country %}
+                <option value = "{{i}}">{{ i }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="w-100"></div>
+        <div class="col p-1">
+            <select class="form-select" style="width:200px" name = "emp_from" id = "emp_from">
+                <option selected value="">Employees from</option>
+                {% for i in current_employee_estimate %}
+                <option value = "{{i}}">{{ i }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col p-1">
+            <select class="form-select" style="width:200px" name = "emp_to" id = "emp_to">
+                <option selected value="">Employees to</option>
+                {% for i in total_employee_estimate %}
+                <option value = "{{i}}">{{ i }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col p-1">
+        </div>
+        <div class="w-100"></div>
+      </div>
+    </div>
+    <button class="btn btn-primary" type="reset"  id = "btn_submit">Submit</button>
+    <button class="btn btn-secondry" type="reset" id = "btn_submit2">Reset</button>
+</form>
+<script>
+    arr_j = {}
+    keyword = document.getElementById('keyword')
+    city = document.getElementById('city')
+    state = document.getElementById('state')
+    country = document.getElementById('country')
+    emp_from = document.getElementById('emp_from')
+    emp_to = document.getElementById('emp_to')
+    
+    form = document.getElementById('form_submit')
+    console.log(form.action)
+    button = document.getElementById('btn_submit')
+    alert_c = document.getElementById('alert_c')
+    csrf = document.getElementsByName('csrfmiddlewaretoken')
+    button.addEventListener('click' , ()=>{
+        arr_j = {}
+        if (keyword.value != ""){
+            arr_j['keyword'] = keyword.value
+        }
+        if (industry.value != ""){
+            arr_j['industry'] = industry.value
+        }
+        if (city.value != ""){
+            arr_j['city'] = city.value
+        }
+        if (state.value != ""){
+            arr_j['state'] = state.value
+        }
+        if (country.value != ""){
+            arr_j['country'] = country.value
+        }
+        if (emp_from.value != ""){
+            arr_j['emp_from'] = emp_from.value
+        }
+        if (emp_to.value != ""){
+            arr_j['emp_to'] = emp_to.value
+        }
+
+        console.log(arr_j)
+        const apiUrl = 'http://127.0.0.1:8000/query_output';
+        fetch(apiUrl,{
+        method: "POST",
+        body: JSON.stringify(arr_j),
+        headers: {
+            "Content-type": "application/json; charset=UTF-8",
+            "X-CSRFToken": csrf[0].value,
+          }
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log("Success: ", data);
+            alert_c.classList.remove('d-none')
+            alert_c.innerHTML = data['count']
+        })
+        .catch((error) => {
+            console.error("Error:", error);
+        });
+    })
+</script>
+{% endblock content %}
